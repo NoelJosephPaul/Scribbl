@@ -272,4 +272,9 @@ input[type="range"] { width: 80px; accent-color: var(--accent); }
 }
 .final-scores li:first-child { background: rgba(108,99,255,0.2); border: 1px solid var(--accent); }
 .final-scores .medal { font-size: 1.2rem; width: 28px; }
-.final-scores .pts { color: var(--accent); font-size: 0.9rem; }
+.made-by {
+  position: fixed; bottom: 12px; right: 16px;
+  font-size: 0.75rem; color: var(--muted); display: flex; align-items: center; gap: 4px;
+  opacity: 0.3;
+}
+.thumbsup-img { width: 16px; height: 16px; object-fit: contain; }
