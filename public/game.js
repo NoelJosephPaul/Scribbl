@@ -243,8 +243,8 @@ socket.on("turn_end", ({ word, scores }) => {
 socket.on("correct_guess", ({ player, points, scores }) => {
   addChat(`✅ ${player} guessed it! +${points} pts`, "correct");
   updatePlayerList(scores, player);
+  playSuccessSound();
   if (player === playerName) {
-    playSuccessSound();
     guessInput.disabled = true;
     guessInput.placeholder = "You guessed it! 🎉";
   }
