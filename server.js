@@ -65,7 +65,7 @@ function startTurn(roomCode) {
 
   room.currentWord = "";
   room.guessedPlayers = new Set();
-  room.timeLeft = ROUND_TIME;
+  room.timeLeft = room.roundTime;
   room.drawingData = [];
 
   const drawerSocket = room.players[room.drawerIndex];
@@ -103,7 +103,7 @@ function chooseWord(roomCode, word) {
   // Reveal ~40% of letters as hints, spaced evenly over the round
   const hintCount = Math.max(1, Math.floor(letterIndices.length * 0.4));
   const hintSlots = shuffledIndices.slice(0, hintCount);
-  const hintInterval = Math.floor(ROUND_TIME / (hintCount + 1));
+  const hintInterval = Math.floor(room.roundTime / (hintCount + 1));
 
   const drawerSocket = room.players[room.drawerIndex];
 
@@ -111,9 +111,10 @@ function chooseWord(roomCode, word) {
     drawer: drawerSocket.playerName,
     wordLength: word.length,
     maskedWord: masked(word),
-    timeLeft: ROUND_TIME,
+    timeLeft: room.roundTime,
     round: room.round,
     maxRounds: room.maxRounds,
+    roundTime: room.roundTime,
   });
 
   drawerSocket.emit("your_word", word);
@@ -183,7 +184,7 @@ io.on("connection", (socket) => {
       code, players: [], drawerIndex: 0, round: 1, maxRounds: 3,
       currentWord: "", wordChoices: [], guessedPlayers: new Set(),
       drawingData: [], started: false, timer: null, pickTimeout: null,
-      timeLeft: 0, hintRevealed: [],
+      timeLeft: 0, hintRevealed: [], roundTime: 30,
     };
 
     socket.playerName = playerName;
@@ -214,12 +215,13 @@ io.on("connection", (socket) => {
     io.to(code).emit("chat_message", { system: true, text: `${playerName} joined!` });
   });
 
-  socket.on("start_game", ({ rounds }) => {
+  socket.on("start_game", ({ rounds, drawTime }) => {
     const room = getRoom(socket.roomCode);
     if (!room || !socket.isHost || room.started) return;
     if (room.players.length < 2) return socket.emit("error", "Need at least 2 players.");
 
-    room.maxRounds = Math.min(Math.max(parseInt(rounds) || 3, 1), 10);
+    room.maxRounds = Math.min(Math.max(parseInt(rounds) || 1, 1), 10);
+    room.roundTime = [30, 40, 50, 60].includes(+drawTime) ? +drawTime : 30;
     room.started = true;
 
     for (let i = room.players.length - 1; i > 0; i--) {
@@ -302,7 +304,7 @@ io.on("connection", (socket) => {
 
       const rankBonus = [200, 150, 120, 100];
       const base = rankBonus[Math.min(guessRank, rankBonus.length - 1)];
-      const points = Math.max(50, Math.round((room.timeLeft / ROUND_TIME) * base));
+      const points = Math.max(50, Math.round((room.timeLeft / room.roundTime) * base));
       socket.score = (socket.score || 0) + points;
       drawer.score = (drawer.score || 0) + 20;
 

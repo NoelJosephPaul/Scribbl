@@ -19,10 +19,20 @@
     <div class="rounds-row">
       <label>Rounds</label>
       <div class="rounds-btns">
-        <button class="round-opt active" data-val="2">2</button>
+        <button class="round-opt active" data-val="1">1</button>
+        <button class="round-opt" data-val="2">2</button>
         <button class="round-opt" data-val="3">3</button>
         <button class="round-opt" data-val="5">5</button>
         <button class="round-opt" data-val="8">8</button>
+      </div>
+    </div>
+    <div class="rounds-row">
+      <label>Draw Time</label>
+      <div class="rounds-btns">
+        <button class="time-opt active" data-val="30">30s</button>
+        <button class="time-opt" data-val="40">40s</button>
+        <button class="time-opt" data-val="50">50s</button>
+        <button class="time-opt" data-val="60">60s</button>
       </div>
     </div>
     <button class="btn-primary" id="createBtn">Create Room</button>
@@ -40,7 +50,8 @@
     const nameInput = document.getElementById("nameInput");
     const codeInput = document.getElementById("codeInput");
     const lobbyError = document.getElementById("lobbyError");
-    let selectedRounds = 2;
+    let selectedRounds = 1;
+    let selectedTime = 30;
 
     document.querySelectorAll(".round-opt").forEach(btn => {
       btn.onclick = () => {
@@ -50,11 +61,19 @@
       };
     });
 
+    document.querySelectorAll(".time-opt").forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll(".time-opt").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        selectedTime = btn.dataset.val;
+      };
+    });
+
     function go(action) {
       const name = nameInput.value.trim();
       if (!name) return (lobbyError.textContent = "Enter your name.");
       if (action === "join" && !codeInput.value.trim()) return (lobbyError.textContent = "Enter a room code.");
-      const params = new URLSearchParams({ name, action, code: codeInput.value.trim().toUpperCase(), rounds: selectedRounds });
+      const params = new URLSearchParams({ name, action, code: codeInput.value.trim().toUpperCase(), rounds: selectedRounds, drawTime: selectedTime });
       window.location.href = "game.html?" + params;
     }
 

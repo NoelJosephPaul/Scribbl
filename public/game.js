@@ -3,7 +3,8 @@ const params = new URLSearchParams(location.search);
 const playerName = params.get("name");
 const action = params.get("action");
 const code = params.get("code");
-const rounds = params.get("rounds") || 3;
+const rounds = params.get("rounds") || 1;
+const drawTime = params.get("drawTime") || 30;
 
 if (!playerName) location.href = "/";
 
@@ -48,7 +49,7 @@ socket.on("player_list", (players) => {
 socket.on("error", (msg) => { waitError.textContent = msg; });
 socket.on("kicked", () => { alert("You were kicked by the host."); location.href = "/"; });
 
-startBtn.onclick = () => socket.emit("start_game", { rounds });
+startBtn.onclick = () => socket.emit("start_game", { rounds, drawTime });
 
 document.getElementById("copyBtn").onclick = () => {
   navigator.clipboard.writeText(roomCodeDisplay.textContent);
@@ -99,7 +100,7 @@ const fillBtn = document.getElementById("fillBtn");
 const transitionOverlay = document.getElementById("transitionOverlay");
 
 const RING_CIRC = 113;
-const ROUND_TIME = 30;
+let ROUND_TIME = 30;
 
 let isDrawing = false;
 let amDrawer = false;
@@ -190,7 +191,8 @@ socket.on("word_choices", (choices) => {
   wordModal.style.display = "flex";
 });
 
-socket.on("turn_start", ({ drawer, wordLength, maskedWord, timeLeft, round, maxRounds }) => {
+socket.on("turn_start", ({ drawer, wordLength, maskedWord, timeLeft, round, maxRounds, roundTime }) => {
+  ROUND_TIME = roundTime;
   transitionOverlay.style.display = "none";
   const choosingEl = document.getElementById("transitionChoosing");
   choosingEl.style.display = "none";
