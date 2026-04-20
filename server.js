@@ -246,16 +246,17 @@ io.on("connection", (socket) => {
     socket.to(socket.roomCode).emit("fill_canvas", data);
   });
 
-  socket.on("undo_canvas", (data) => {
+  socket.on("undo_canvas", () => {
     const room = getRoom(socket.roomCode);
     if (!room || room.players[room.drawerIndex] !== socket) return;
-    socket.to(socket.roomCode).emit("undo_canvas", data);
+    room.drawingData.pop();
+    io.to(socket.roomCode).emit("undo_canvas", room.drawingData);
   });
 
   socket.on("draw", (data) => {
     const room = getRoom(socket.roomCode);
     if (!room || room.players[room.drawerIndex] !== socket) return;
-    room.drawingData.push(data);
+    if (room.drawingData.length < 800) room.drawingData.push(data);
     socket.to(socket.roomCode).emit("draw", data);
   });
 

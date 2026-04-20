@@ -103,11 +103,13 @@ const ROUND_TIME = 30;
 
 let isDrawing = false;
 let amDrawer = false;
-let activeTool = "pencil"; // pencil | eraser | fill
+let activeTool = "pencil";
 let lastX = 0, lastY = 0;
 let currentDrawer = "";
 let currentColor = "#000000";
-let strokeHistory = []; // for undo: array of ImageData snapshots
+let strokeHistory = [];
+let lastEmit = 0;
+let undoCooldown = false;
 
 // ── Color swatches ──
 const SWATCHES = ["#000000","#ffffff","#ef4444","#f97316","#eab308","#22c55e","#3b82f6","#8b5cf6","#ec4899","#6b7280","#92400e","#0ea5e9"];
@@ -318,6 +320,9 @@ canvas.addEventListener("mousedown", (e) => {
 
 canvas.addEventListener("mousemove", (e) => {
   if (!isDrawing || !amDrawer || activeTool === "fill") return;
+  const now = Date.now();
+  if (now - lastEmit < 30) return; // throttle to ~33 events/sec
+  lastEmit = now;
   const [x, y] = getPos(e);
   const color = activeTool === "eraser" ? "#ffffff" : currentColor;
   const size = activeTool === "eraser" ? +brushSize.value * 3 : +brushSize.value;
@@ -351,17 +356,17 @@ function saveSnapshot() {
 }
 
 function undoStroke() {
-  if (!strokeHistory.length) return;
+  if (!strokeHistory.length || undoCooldown) return;
+  undoCooldown = true;
+  setTimeout(() => (undoCooldown = false), 500);
   const snap = strokeHistory.pop();
   ctx.putImageData(snap, 0, 0);
-  // Sync undo to others by sending current canvas as full state
-  socket.emit("undo_canvas", { dataUrl: canvas.toDataURL() });
+  socket.emit("undo_canvas", {});
 }
 
-socket.on("undo_canvas", ({ dataUrl }) => {
-  const img = new Image();
-  img.onload = () => { ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.drawImage(img, 0, 0); };
-  img.src = dataUrl;
+socket.on("undo_canvas", (drawHistory) => {
+  clearCanvas();
+  drawHistory.forEach(d => drawLine(d.x0, d.y0, d.x1, d.y1, d.color, d.size));
 });
 
 function drawLine(x0, y0, x1, y1, color, size) {
