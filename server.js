@@ -9,31 +9,29 @@ const io = new Server(server);
 app.use(express.static("public"));
 
 const WORDS = [
-  // original
   "apple","banana","car","dog","elephant","flower","guitar","house","island","jungle",
   "kite","lion","mountain","notebook","ocean","piano","queen","rainbow","sun","tree",
-  "umbrella","violin","waterfall","xylophone","yacht","zebra","bridge","castle","dragon",
+  "umbrella","violin","waterfall","yacht","zebra","bridge","castle","dragon",
   "eagle","forest","ghost","hammer","igloo","jellyfish","knight","lantern","mirror",
-  "ninja","owl","penguin","quilt","rocket","snake","tornado","unicorn","volcano","wizard",
-  "anchor","balloon","cactus","diamond","engine","feather","globe","helmet","iceberg",
-  "jacket","kettle","lemon","magnet","noodle","orange","parrot","quicksand","ribbon","scissors",
-  // medium
-  "airport","archery","backpack","barbecue","binoculars","birdcage","blueprint","bookshelf",
-  "bowling","campfire","candle","cannon","captain","carnival","carousel","catapult",
-  "chandelier","chimney","clocktower","compass","conveyor","cowboy","crowbar","crystal",
-  "curtain","dagger","dartboard","detective","dumbbell","dungeon","escalator","explorer",
-  "factory","ferris wheel","fishbowl","flashlight","fountain","frying pan","gargoyle",
-  "glacier","gondola","gravestone","greenhouse","hammock","handcuffs","hourglass",
-  "hovercraft","hurricane","hypnotist","icicle","joystick","kayak","labyrinth","ladder",
-  "lighthouse","lollipop","lumberjack","magnifying glass","mailbox","manhole","mansion",
-  "megaphone","mermaid","microscope","mousetrap","mummy","mushroom","parachute","passport",
-  "periscope","pirate","pitchfork","plunger","podium","popcorn","portrait","pretzel",
-  "pulley","pumpkin","pyramid","rowboat","saddle","satellite","scarecrow","scuba diver",
-  "shipwreck","skateboard","skeleton","slingshot","snowglobe","sphinx","stalactite",
-  "stapler","stethoscope","stopwatch","submarine","sundial","surfboard","syringe",
-  "telescope","thermometer","thumbtack","tightrope","tombstone","toolbox","treasure chest",
-  "trampoline","treadmill","treehouse","trophy","tugboat","tunnel","typewriter","vending machine",
-  "walrus","weathervane","wheelbarrow","whirlpool","windmill","wrecking ball",
+  "ninja","owl","penguin","rocket","snake","tornado","unicorn","volcano","wizard",
+  "anchor","balloon","cactus","diamond","feather","globe","helmet","iceberg",
+  "jacket","kettle","lemon","magnet","noodle","orange","parrot","ribbon","scissors",
+  "airport","backpack","barbecue","binoculars","bookshelf",
+  "bowling","campfire","candle","cannon","captain","carnival","carousel",
+  "chimney","compass","cowboy","crystal",
+  "curtain","dagger","dartboard","detective","dumbbell","dungeon","escalator",
+  "factory","ferris wheel","fishbowl","flashlight","fountain","frying pan",
+  "gravestone","greenhouse","hammock","handcuffs","hourglass",
+  "hurricane","icicle","joystick","kayak","ladder",
+  "lighthouse","lollipop","lumberjack","magnifying glass","mailbox","mansion",
+  "megaphone","mermaid","microscope","mousetrap","mummy","mushroom","parachute",
+  "pirate","plunger","podium","popcorn","pretzel",
+  "pumpkin","pyramid","rowboat","saddle","scarecrow","scuba diver",
+  "shipwreck","skateboard","skeleton","slingshot","snowglobe",
+  "stapler","stethoscope","stopwatch","submarine","surfboard",
+  "telescope","thermometer","tightrope","tombstone","treasure chest",
+  "trampoline","treehouse","trophy","tugboat","tunnel","typewriter","vending machine",
+  "walrus","wheelbarrow","whirlpool","windmill","wrecking ball",
 ];
 
 const ROUND_TIME = 30;
@@ -224,6 +222,15 @@ io.on("connection", (socket) => {
 
     io.to(room.code).emit("game_started");
     startTurn(room.code);
+  });
+
+  socket.on("stop_game", () => {
+    const room = getRoom(socket.roomCode);
+    if (!room || !socket.isHost) return;
+    clearInterval(room.timer);
+    clearTimeout(room.pickTimeout);
+    io.to(room.code).emit("game_stopped");
+    delete rooms[room.code];
   });
 
   socket.on("choose_word", ({ word }) => {

@@ -152,7 +152,14 @@ fillBtn.onclick = () => setTool(activeTool === "fill" ? "pencil" : "fill");
 socket.on("game_started", () => {
   waitingRoom.style.display = "none";
   gameArea.style.display = "flex";
+  if (isHost) document.getElementById("stopGameBtn").style.display = "block";
 });
+
+socket.on("game_stopped", () => { window.location.href = "/"; });
+
+document.getElementById("stopGameBtn").onclick = () => {
+  if (confirm("Stop the game for everyone?")) socket.emit("stop_game");
+};
 
 socket.on("waiting_for_word", ({ drawer }) => {
   currentDrawer = drawer;
