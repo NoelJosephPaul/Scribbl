@@ -156,6 +156,13 @@ function nextTurn(roomCode) {
   if (room.drawerIndex >= room.players.length) {
     room.drawerIndex = 0;
     room.round++;
+    // Re-shuffle order for the new round so it's different each time
+    if (room.round <= room.maxRounds) {
+      for (let i = room.players.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [room.players[i], room.players[j]] = [room.players[j], room.players[i]];
+      }
+    }
   }
 
   if (room.round > room.maxRounds) {
