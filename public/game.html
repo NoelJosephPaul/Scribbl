@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Scribbl</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <!-- Waiting Room -->
+  <div id="waitingRoom" class="waiting-card">
+    <div class="logo">🎨 Scribbl</div>
+    <div class="room-code-box">
+      <span class="room-label">Room Code</span>
+      <span id="roomCodeDisplay" class="room-code">——</span>
+      <button class="copy-btn" id="copyBtn" title="Copy code">📋</button>
+    </div>
+    <p class="waiting-hint">Share the code with your friends!</p>
+    <ul id="waitingPlayerList" class="waiting-players"></ul>
+    <div id="hostControls" style="display:none">
+      <button class="btn-primary" id="startBtn">Start Game</button>
+    </div>
+    <p id="waitMsg" class="muted">Waiting for host to start…</p>
+    <p id="waitError" class="error"></p>
+  </div>
+
+  <!-- Turn End Transition -->
+  <div id="transitionOverlay" class="transition-overlay" style="display:none">
+    <div class="transition-card">
+      <div class="transition-label">The word was</div>
+      <div class="transition-word" id="transitionWord"></div>
+      <div class="transition-scores" id="transitionScores"></div>
+      <div class="transition-choosing" id="transitionChoosing" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- Word Choice Modal -->
+  <div id="wordModal" class="modal-overlay" style="display:none">
+    <div class="modal-card">
+      <p class="modal-title">Choose a word to draw</p>
+      <div id="wordChoices" class="word-choices"></div>
+    </div>
+  </div>
+
+  <!-- Game Area -->
+  <div id="gameArea" class="game-area" style="display:none">
+    <header class="top-bar">
+      <div class="top-left">
+        <span class="badge" id="roundBadge">Round 1</span>
+        <span id="drawerLabel" class="drawer-label"></span>
+      </div>
+      <div class="word-display" id="wordDisplay"></div>
+      <div class="timer-wrap">
+        <svg class="timer-ring" viewBox="0 0 44 44">
+          <circle cx="22" cy="22" r="18" class="ring-bg"/>
+          <circle cx="22" cy="22" r="18" class="ring-fill" id="timerRing"/>
+        </svg>
+        <span id="timerDisplay" class="timer-num">30</span>
+      </div>
+    </header>
+
+    <div class="main">
+      <aside class="players-panel">
+        <div class="panel-title">Players</div>
+        <ul id="playerList"></ul>
+      </aside>
+
+      <div class="canvas-wrap">
+        <canvas id="canvas" width="800" height="520"></canvas>
+        <div id="drawTools" class="draw-tools" style="display:none">
+          <div class="color-swatches" id="colorSwatches"></div>
+          <input type="color" id="colorPicker" value="#000000" title="Custom color"/>
+          <div class="brush-wrap">
+            <span>🖌</span>
+            <input type="range" id="brushSize" min="2" max="32" value="5"/>
+          </div>
+          <button class="tool-btn eraser-btn" id="eraserBtn">⬜ Eraser</button>
+          <button class="tool-btn fill-btn" id="fillBtn">🪣 Fill</button>
+          <button class="tool-btn undo-btn" id="undoBtn">↩ Undo</button>
+          <button class="tool-btn clear-btn" id="clearBtn">🗑 Clear</button>
+        </div>
+      </div>
+
+      <aside class="chat-panel">
+        <div class="panel-title">Chat & Guesses</div>
+        <div id="chatBox"></div>
+        <form id="guessForm">
+          <input id="guessInput" type="text" placeholder="Type your guess…" autocomplete="off"/>
+          <button type="submit">➤</button>
+        </form>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Game Over -->
+  <div id="gameOver" class="gameover-card" style="display:none">
+    <div class="logo">🏆 Game Over!</div>
+    <ul id="finalScores" class="final-scores"></ul>
+    <button class="btn-primary" onclick="window.location.href='/'">Back to Lobby</button>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

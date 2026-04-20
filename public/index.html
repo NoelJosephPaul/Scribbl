@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Scribbl</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <div class="lobby-card">
+    <div class="logo">🎨 Scribbl</div>
+    <p class="tagline">Draw. Guess. Win.</p>
+
+    <input id="nameInput" type="text" placeholder="Your name" maxlength="20" autocomplete="off"/>
+
+    <div class="divider"><span>CREATE</span></div>
+    <div class="rounds-row">
+      <label>Rounds</label>
+      <div class="rounds-btns">
+        <button class="round-opt active" data-val="2">2</button>
+        <button class="round-opt" data-val="3">3</button>
+        <button class="round-opt" data-val="5">5</button>
+        <button class="round-opt" data-val="8">8</button>
+      </div>
+    </div>
+    <button class="btn-primary" id="createBtn">Create Room</button>
+
+    <div class="divider"><span>JOIN</span></div>
+    <div class="join-row">
+      <input id="codeInput" type="text" placeholder="Room code" maxlength="6" autocomplete="off"/>
+      <button class="btn-secondary" id="joinBtn">Join</button>
+    </div>
+
+    <p id="lobbyError" class="error"></p>
+  </div>
+
+  <script>
+    const nameInput = document.getElementById("nameInput");
+    const codeInput = document.getElementById("codeInput");
+    const lobbyError = document.getElementById("lobbyError");
+    let selectedRounds = 2;
+
+    document.querySelectorAll(".round-opt").forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll(".round-opt").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        selectedRounds = btn.dataset.val;
+      };
+    });
+
+    function go(action) {
+      const name = nameInput.value.trim();
+      if (!name) return (lobbyError.textContent = "Enter your name.");
+      if (action === "join" && !codeInput.value.trim()) return (lobbyError.textContent = "Enter a room code.");
+      const params = new URLSearchParams({ name, action, code: codeInput.value.trim().toUpperCase(), rounds: selectedRounds });
+      window.location.href = "game.html?" + params;
+    }
+
+    document.getElementById("createBtn").onclick = () => go("create");
+    document.getElementById("joinBtn").onclick = () => go("join");
+    document.addEventListener("keydown", e => { if (e.key === "Enter") go(codeInput.value.trim() ? "join" : "create"); });
+  </script>
+</body>
+</html>
